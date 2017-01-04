@@ -49,8 +49,7 @@ class PatchEverywhere(object):
             del m
         else:
             if self.DEBUG:
-                print type(m)
-                raise RuntimeError('unknown type of referrer')
+                raise RuntimeError('unknown type of referrer: ' + str(type(m)))
 
     def __enter__(self):
         self.places = []
