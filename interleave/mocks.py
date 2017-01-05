@@ -1,12 +1,12 @@
 import greenlet
 import decorator
 import contextlib2
+import thread
+import time
 
 from interleave import concurrency
-from interleave.monkeypatch import PatchEverywhere
+import patch_c_func
 
-
-_LockType = concurrency.Lock
 
 def _start_new_thread(function, args, kwargs=None):
     if kwargs is None:
@@ -33,20 +33,9 @@ def _sleep(_):
     scheduler.switch()
 
 
-def get_patchers():
-    import thread
-    import time
-    names = [
-        'LockType', 'start_new_thread', 'interrupt_main', 'exit',
-        'allocate_lock', 'get_ident'
-    ]
-    return [
-        PatchEverywhere(getattr(thread, name), globals()['_' + name])
-        for name in names
-    ] + [PatchEverywhere(time.sleep, _sleep)]
+class mock_thread(contextlib2.ContextDecorator):
+    nesting_level = 0
 
-
-class mock_thread(contextlib2.ExitStack, contextlib2.ContextDecorator):
     def __init__(self, scheduler):
         super(mock_thread, self).__init__()
         if not isinstance(scheduler, concurrency.BaseScheduler):
@@ -57,6 +46,23 @@ class mock_thread(contextlib2.ExitStack, contextlib2.ContextDecorator):
         self.scheduler = scheduler
 
     def __enter__(self):
-        for patcher in get_patchers():
-            self.enter_context(patcher)
-        self.enter_context(self.scheduler)
+        self.scheduler.__enter__()
+        if mock_thread.nesting_level == 0:
+            patch_c_func.patch(thread.start_new_thread, _start_new_thread)
+            patch_c_func.patch(thread.interrupt_main, _interrupt_main)
+            patch_c_func.patch(thread.exit, _exit)
+            patch_c_func.patch(thread.allocate_lock, _allocate_lock)
+            patch_c_func.patch(thread.get_ident, _get_ident)
+            patch_c_func.patch(time.sleep, _sleep)
+        mock_thread.nesting_level += 1
+
+    def __exit__(self, *args, **kwargs):
+        mock_thread.nesting_level -= 1
+        if mock_thread.nesting_level == 0:
+            patch_c_func.unpatch(thread.start_new_thread)
+            patch_c_func.unpatch(thread.interrupt_main)
+            patch_c_func.unpatch(thread.exit)
+            patch_c_func.unpatch(thread.allocate_lock)
+            patch_c_func.unpatch(thread.get_ident)
+            patch_c_func.unpatch(time.sleep)
+        return self.scheduler.__exit__(*args, **kwargs)

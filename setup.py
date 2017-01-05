@@ -19,7 +19,7 @@ reqs = [str(ir.req) for ir in install_reqs]
 setup(
     name='interleave',
     version='0.1',
-    description=('Mocks for deterministic unit tests for thread safety.'),
+    description=('Library for testing thread-safety in a repeatable-deterministic way.'),
     ext_modules=[patchbuiltins],
     packages=[
         'interleave',
