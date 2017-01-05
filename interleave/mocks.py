@@ -46,15 +46,17 @@ def get_patchers():
     ] + [PatchEverywhere(time.sleep, _sleep)]
 
 
-@contextlib2.contextmanager
-def mock_thread(scheduler):
-    if not isinstance(scheduler, concurrency.BaseScheduler):
-        # support classes and factory functions as arguments
-        scheduler = scheduler()
-    if not isinstance(scheduler, concurrency.BaseScheduler):
-        raise TypeError('scheduler must be a subclass of BaseScheduler')
-    with contextlib2.ExitStack() as stack:
+class mock_thread(contextlib2.ExitStack):
+    def __init__(self, scheduler):
+        super(mock_thread, self).__init__()
+        if not isinstance(scheduler, concurrency.BaseScheduler):
+            # support classes and factory functions as arguments
+            scheduler = scheduler()
+        if not isinstance(scheduler, concurrency.BaseScheduler):
+            raise TypeError('scheduler must be a subclass of BaseScheduler')
+        self.scheduler = scheduler
+
+    def __enter__(self):
         for patcher in get_patchers():
-            stack.enter_context(patcher)
-        with scheduler:
-            yield
+            self.enter_context(patcher)
+        self.enter_context(self.scheduler)

@@ -56,9 +56,8 @@ class PatchEverywhere(contextlib2.ContextDecorator):
         self.places = []
         refs = gc.get_referrers(self.old)
         for ref in refs:
-            if ref is self.__dict__:
-                continue
-            self.add_referrer(ref)
+            if ref is not self.__dict__:
+                self.add_referrer(ref)
         return self
 
     def __exit__(self, *args, **kwargs):

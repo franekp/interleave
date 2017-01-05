@@ -28,4 +28,14 @@ class SimpleGeneratorScheduler(GeneratorScheduler):
                 for i in xrange(17):
                     yield i
 
-        super(SimpleGeneratorScheduler, self).__init__(gen)
+        super(SimpleGeneratorScheduler, self).__init__(gen())
+
+
+class BoundedGeneratorScheduler(GeneratorScheduler):
+    def __init__(self):
+        def gen():
+            while True:
+                for i in xrange(17):
+                    yield i
+
+        super(SimpleGeneratorScheduler, self).__init__(gen())

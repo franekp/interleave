@@ -1,14 +1,18 @@
 import threading
+import thread
 
 import interleave.mocks
 import interleave.core
+import interleave.monkeypatch
 from .stdlib_suite import py2_lock_tests as lock_tests
 
-
-interleave.mocks.mock_thread(
+#interleave.monkeypatch.PatchEverywhere.DEBUG = True
+ctx = interleave.mocks.mock_thread(
     interleave.core.SimpleGeneratorScheduler()
 ).__enter__()
-
+print(threading.Lock)
+print(thread.allocate_lock)
+print(thread.start_new_thread)
 
 class LockTests(lock_tests.LockTests):
     locktype = staticmethod(threading.Lock)

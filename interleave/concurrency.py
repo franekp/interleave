@@ -134,6 +134,7 @@ class BaseScheduler(AbstractScheduler):
         return id(thread)
 
     def get_threads_waiting_for(self, x):
+        self.threads = [t for t in self.threads if not t.dead]
         return [t for t in self.threads if t.waiting_for is x]
 
     def switch(self):
