@@ -104,12 +104,27 @@ class AbstractScheduler(object):
         self.switch_after_release_lock()
 
 
-class Scheduler(AbstractScheduler):
+class BaseScheduler(AbstractScheduler):
     def __init__(self):
+        self.threads = None
+
+    def __enter__(self):
+        # enter and exit methods are assumed to be called from the same greenlet
         thread = greenlet.getcurrent()
+        if hasattr(thread, 'scheduler'):
+            self.previous_scheduler = thread.scheduler
         thread.scheduler = self
         thread.waiting_for = None
         self.threads = [thread]
+
+    def __exit__(self, *args, **kwargs):
+        thread = greenlet.getcurrent()
+        if hasattr(self, 'previous_scheduler'):
+            thread.scheduler = self.previous_scheduler
+            del self.previous_scheduler
+        else:
+            del thread.scheduler
+        self.threads = None
 
     def create_thread(self, callable):
         thread = greenlet.greenlet(callable)

@@ -1,12 +1,15 @@
 import gc
 import inspect
 
+import contextlib2
 from decorator import decorator
 
 
-class PatchEverywhere(object):
+class PatchEverywhere(contextlib2.ContextDecorator):
     # FIXME:
     # - this does not yet work for class attributes
+    # - this does not yet work for staticmethods, namedtuples etc. - patching
+    #   attributes directly on objects instead of their __dict__
     # - this does not work for stack frames (locals()) and probably never will
     DEBUG = False
 
@@ -15,18 +18,15 @@ class PatchEverywhere(object):
         self.new = new
         self.places = None
 
-    def __call__(self, func):
-        @decorator
-        def decorate(func, *args, **kwargs):
-            with self:
-                res = func(*args, **kwargs)
-            return res
-        return decorate(func)
-
     def is_active(self):
+        # used only in testing
         refs = gc.get_referrers(self.old)
-        refs = [ref for ref in refs if not inspect.isframe(ref)]
+        refs = [ref for ref in refs if not self.can_ignore_referrer(ref)]
         return (refs[0] is self.__dict__) and (len(refs) == 1)
+
+    def can_ignore_referrer(self, ref):
+        # used only in testing
+        return inspect.isframe(ref) or isinstance(ref, staticmethod)
 
     def add_dict(self, m):
         for key, val in m.items():
@@ -45,11 +45,12 @@ class PatchEverywhere(object):
             self.add_dict(m)
         elif isinstance(m, list):
             self.add_list(m)
-        elif inspect.isframe(m):
-            del m
         else:
-            if self.DEBUG:
-                raise RuntimeError('unknown type of referrer: ' + str(type(m)))
+            if self.DEBUG and not self.can_ignore_referrer(m):
+                msg = 'unknown type of referrer: '
+                msg += str(type(m)) + '\n'
+                msg += 'result of calling dir() on it: ' + str(dir(m)) + '\n'
+                raise RuntimeError(msg)
 
     def __enter__(self):
         self.places = []
