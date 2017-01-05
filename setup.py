@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 
 import os
-from setuptools import setup
+from setuptools import setup, Extension
 from pip.req import parse_requirements
 
+
+patchbuiltins = Extension(
+    'patch_c_func',
+    sources=['patch_c_func.c'],
+)
 
 req_file = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "requirements.txt"
@@ -15,6 +20,7 @@ setup(
     name='interleave',
     version='0.1',
     description=('Mocks for deterministic unit tests for thread safety.'),
+    ext_modules=[patchbuiltins],
     packages=[
         'interleave',
     ],

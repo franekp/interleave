@@ -23,7 +23,7 @@ def decorate_method(m):
         assert threading._allocate_lock is interleave.mocks._allocate_lock
         assert threading._start_new_thread is interleave.mocks._start_new_thread
         if hasattr(self, 'locktype'):
-            assert self.locktype is interleave.mocks._allocate_lock
+            assert self.locktype is interleave.mocks._allocate_lock, str(self.locktype)
         print m.__name__
         return m(self, *args, **kwargs)
     return newm
