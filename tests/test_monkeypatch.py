@@ -1,11 +1,10 @@
 import unittest
+import mock
 
 from interleave.monkeypatch import PatchEverywhere
 
 
-PatchEverywhere.DEBUG = True
-
-
+@mock.patch('interleave.monkeypatch.PatchEverywhere.DEBUG', new=True)
 class TestPatchEverywhereContextManager(unittest.TestCase):
     def test_builtin(self):
         patched = lambda: None

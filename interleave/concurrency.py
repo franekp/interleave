@@ -1,3 +1,4 @@
+import sys
 import threading
 try:
     # python 2
@@ -9,12 +10,17 @@ except:
 import greenlet
 
 
+DEBUG = False
+
+
 class DeadLockError(Exception):
     pass
 
 
 class Lock(object):
     def __init__(self):
+        if DEBUG:
+            sys.stdout.write('L')
         self._locked = False
 
     def acquire(self, blocking=True):
@@ -127,6 +133,8 @@ class BaseScheduler(AbstractScheduler):
         self.threads = None
 
     def create_thread(self, callable):
+        if DEBUG:
+            sys.stdout.write('T')
         thread = greenlet.greenlet(callable)
         thread.scheduler = self
         thread.waiting_for = None

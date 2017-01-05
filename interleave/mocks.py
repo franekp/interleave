@@ -46,7 +46,7 @@ def get_patchers():
     ] + [PatchEverywhere(time.sleep, _sleep)]
 
 
-class mock_thread(contextlib2.ExitStack):
+class mock_thread(contextlib2.ExitStack, contextlib2.ContextDecorator):
     def __init__(self, scheduler):
         super(mock_thread, self).__init__()
         if not isinstance(scheduler, concurrency.BaseScheduler):

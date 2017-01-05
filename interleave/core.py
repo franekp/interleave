@@ -32,10 +32,5 @@ class SimpleGeneratorScheduler(GeneratorScheduler):
 
 
 class BoundedGeneratorScheduler(GeneratorScheduler):
-    def __init__(self):
-        def gen():
-            while True:
-                for i in xrange(17):
-                    yield i
-
-        super(SimpleGeneratorScheduler, self).__init__(gen())
+    def __init__(self, limit):
+        super(BoundedGeneratorScheduler, self).__init__(iter(xrange(limit)))
