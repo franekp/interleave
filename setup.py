@@ -5,9 +5,14 @@ from distutils.core import setup, Extension
 from pip.req import parse_requirements
 
 
-patchbuiltins = Extension(
+patch_c_func = Extension(
     'interleave.patch_c_func',
     sources=['interleave/patch_c_func.c'],
+)
+
+patch_greenlet = Extension(
+    'interleave.patch_greenlet',
+    sources=['interleave/patch_greenlet.c'],
 )
 
 req_file = os.path.join(
@@ -20,7 +25,7 @@ setup(
     name='interleave',
     version='0.1',
     description=('Library for testing thread-safety in a repeatable-deterministic way.'),
-    ext_modules=[patchbuiltins],
+    ext_modules=[patch_c_func, patch_greenlet],
     packages=[
         'interleave',
     ],
