@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import os
-from setuptools import setup, Extension
+from distutils.core import setup, Extension
 from pip.req import parse_requirements
 
 
 patchbuiltins = Extension(
-    'patch_c_func',
-    sources=['patch_c_func.c'],
+    'interleave.patch_c_func',
+    sources=['interleave/patch_c_func.c'],
 )
 
 req_file = os.path.join(

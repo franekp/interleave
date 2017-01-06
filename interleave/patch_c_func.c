@@ -75,14 +75,14 @@ static PyMethodDef methods[] = {
     {"unpatch", patch_c_func_unpatch, METH_VARARGS,
      "Undo monkey-patch on a 'builtin_function_or_method'."},
     {"internal_state", patch_c_func_internal_state, METH_VARARGS,
-     "Return internal state of the module for debugging/testing purposes."},
+     "Return internal state of this module for debugging/testing purposes."},
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
 PyMODINIT_FUNC initpatch_c_func(void) {
   PyObject *m;
 
-  m = Py_InitModule("patch_c_func", methods);
+  m = Py_InitModule("interleave.patch_c_func", methods);
   if (m == NULL)
     return;
   my__error = PyErr_NewException("patch_c_func.Error", NULL, NULL);
