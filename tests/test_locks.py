@@ -6,7 +6,7 @@ import functools
 import interleave.mocks
 import interleave.core
 import interleave.monkeypatch
-from .stdlib_suite import py2_lock_tests as lock_tests
+from stdlib_suite import py2_lock_tests as lock_tests
 
 
 LIMIT = 100000
