@@ -1,14 +1,15 @@
 import unittest
 import threading
-# FIXME TODO 'threadmock' is a better name for this project!
+# FIXME TODO 'threadmock' is a much better name for this project!
 from interleave import backtrack_test, whitebox_test, random_test
 
 
 @interleave.defaults(max_depth=10, runs=1000)
-class PlannedAPIExamples(unittest.TestCase):
+class PlannedAPIExamples__General(unittest.TestCase):
     @random_test(runs=5000)
     def test_random(self):
         SUT = SystemUnderTest()
+        s.invariant(lambda: SUT.check_invariant())
         SUT.start_bunch_of_threads()
         SUT.wait()
 
@@ -17,6 +18,7 @@ class PlannedAPIExamples(unittest.TestCase):
     @random_test  # default value of 'runs' argument is used
     def test_random_with_defaults(self):
         SUT = SystemUnderTest()
+        s.invariant(lambda: SUT.check_invariant())
         SUT.start_bunch_of_threads()
         SUT.wait()
 
@@ -32,6 +34,7 @@ class PlannedAPIExamples(unittest.TestCase):
         s.switch_when(...)
 
         SUT = SystemUnderTest()
+        s.invariant(lambda: SUT.check_invariant())
         SUT.start_bunch_of_threads()
 
         SUT.wait()
@@ -44,6 +47,7 @@ class PlannedAPIExamples(unittest.TestCase):
         b2 = Breakpoint(...)
 
         SUT = SystemUnderTest()
+        s.invariant(lambda: SUT.check_invariant())
         SUT.start_bunch_of_threads()
 
         # t1, t2 are instances of threading.Thread
@@ -175,7 +179,84 @@ class PlannedAPIExamples(unittest.TestCase):
         t2.run_while(...)
 
         # instead of .join() - these threads not running, so cannot join()
+        # join on such threads will raise an exception explaining these concepts
+        # and suggesting using run_until(is_alive=False) or calling .release()
+        # on a corresponding breakpoint before
         t1.run_until(is_alive=False)
         t2.run_until(is_alive=False)
 
         self.assertSomething(SUT)
+
+
+@interleave.defaults(max_depth=10, runs=1000)
+class PlannedAPIExamples__Predicates(unittest.TestCase):
+    # predicates here are illustrated using Thread.run_until
+    # they work the same way when used as arguments to:
+    # Breakpoint.__init__, Thread.run_while, Thread.switch_when,
+    # interleave.State.switch_when, interleave.State.invariant
+    @whitebox_test
+    def test_whitebox_create(self, s):
+
+        SUT = SystemUnderTest()
+        t1 = threading.Thread(target=SUT.do_work)
+        t2 = threading.Thread(target=SUT.do_work)
+
+        # s is an instance of interleave.State
+        # add an invariant to be checked before each executed line
+        # of code (implemented as a sys.settrace hack). This is most useful in
+        # random_test and backtrack_test though
+        s.invariant(lambda: SUT.check_invariant())
+
+        # the most basic form of a predicate is a lambda without arguments
+        # if the lambda raises a LocalVariableAttributeError, it is treated as
+        # if the predicate returned false. the below example matches any
+        # function that has a local variable named 'a' that has value 5
+        t1.run_until(lambda: s.locals.a == 5)
+        # the following 2 lines are equivalent and run the t1 thread until
+        # it will block on any synchronization primitive (all of them are
+        # implemented using a thread.allocate_lock() anyway)
+        t1.run_until(is_blocked=True)
+        t1.run_until(lambda: t1 in s.blocked_threads)
+
+        # assert that t1 waits on some particular resource
+        # SUT.some_resource can be any of the synchronization primitives found
+        # in stdlib's threading module
+        self.assertTrue(t1 in s.waiting_for[SUT.some_resource])
+
+        # run thread t2 until it releases the resource that t1 waits for.
+        # the run_until method will raise an exception if the thread had
+        # finished before the specified condition was met
+        t2.run_until(lambda: t1 not in s.blocked_threads)
+
+        # runs until t1 enters a function named 'somefunction'
+        # a function object cannot be used here because of implementation issues
+        # TO CONSIDER: allow using a function object here and check equivalence
+        # of underlying code objects...
+        t1.run_until(func='somefunction')
+        t1.run_until(lambda: s.func == 'somefunction')
+
+        # the following 2 are equivalent and run until next assignment
+        # instruction; s.line is a line of code stripped of leading and
+        # trailing whitespace
+        t2.run_until(lambda: ' = ' in s.line, func='otherfunction')
+        t2.run_until(lambda: ' = ' in s.line and s.func == 'otherfunction')
+
+        t1.run_until(line='some_object.some_method()')
+        t1.run_until(lambda: s.line == 'some_object.some_method()')
+
+        # runs until the thread finishes execution
+        t1.run_until(is_alive=False)
+        t1.run_until(lambda: t1 not in s.alive_threads)
+
+
+### PROBLEMS:
+## How to break instructions of the form: a += b ?
+#  some solution from the internet:
+#  http://nedbatchelder.com/blog/200804/wicked_hack_python_bytecode_tracing.html
+#  a patch decorator can be made that will replace requested function's code
+#  (f.__code__) so that fake line numbers (pretending that each bytecode
+# instruction is in a separate line) are in the lnotab attribute, so that the
+# sys.trace is invoked before each bytecode instruction instead of before each
+# line
+## Check if threading.Thread does not swallow exceptions raised in this thread
+# and how exception handling in greenlets works
