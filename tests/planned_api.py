@@ -9,7 +9,7 @@ class PlannedAPIExamples__General(unittest.TestCase):
     @random_test(runs=5000)
     def test_random(self):
         SUT = SystemUnderTest()
-        s.invariant(lambda: SUT.check_invariant())
+        s.add_invariant(lambda: SUT.check_invariant())
         SUT.start_bunch_of_threads()
         SUT.wait()
 
@@ -18,7 +18,7 @@ class PlannedAPIExamples__General(unittest.TestCase):
     @random_test  # default value of 'runs' argument is used
     def test_random_with_defaults(self):
         SUT = SystemUnderTest()
-        s.invariant(lambda: SUT.check_invariant())
+        s.add_invariant(lambda: SUT.check_invariant())
         SUT.start_bunch_of_threads()
         SUT.wait()
 
@@ -34,7 +34,7 @@ class PlannedAPIExamples__General(unittest.TestCase):
         s.switch_when(...)
 
         SUT = SystemUnderTest()
-        s.invariant(lambda: SUT.check_invariant())
+        s.add_invariant(lambda: SUT.check_invariant())
         SUT.start_bunch_of_threads()
 
         SUT.wait()
@@ -47,7 +47,7 @@ class PlannedAPIExamples__General(unittest.TestCase):
         b2 = Breakpoint(...)
 
         SUT = SystemUnderTest()
-        s.invariant(lambda: SUT.check_invariant())
+        s.add_invariant(lambda: SUT.check_invariant())
         SUT.start_bunch_of_threads()
 
         # t1, t2 are instances of threading.Thread
@@ -193,7 +193,7 @@ class PlannedAPIExamples__Predicates(unittest.TestCase):
     # predicates here are illustrated using Thread.run_until
     # they work the same way when used as arguments to:
     # Breakpoint.__init__, Thread.run_while, Thread.switch_when,
-    # interleave.State.switch_when, interleave.State.invariant
+    # interleave.State.switch_when, interleave.State.add_invariant
     @whitebox_test
     def test_whitebox_create(self, s):
 
@@ -205,7 +205,7 @@ class PlannedAPIExamples__Predicates(unittest.TestCase):
         # add an invariant to be checked before each executed line
         # of code (implemented as a sys.settrace hack). This is most useful in
         # random_test and backtrack_test though
-        s.invariant(lambda: SUT.check_invariant())
+        s.add_invariant(lambda: SUT.check_invariant())
 
         # the most basic form of a predicate is a lambda without arguments
         # if the lambda raises a LocalVariableAttributeError, it is treated as
