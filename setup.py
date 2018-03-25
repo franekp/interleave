@@ -6,13 +6,13 @@ from pip.req import parse_requirements
 
 
 patch_c_func = Extension(
-    'interleave.patch_c_func',
-    sources=['interleave/patch_c_func.c'],
+    'threadmock.patch_c_func',
+    sources=['threadmock/patch_c_func.c'],
 )
 
 patch_greenlet = Extension(
-    'interleave.patch_greenlet',
-    sources=['interleave/patch_greenlet.c'],
+    'threadmock.patch_greenlet',
+    sources=['threadmock/patch_greenlet.c'],
 )
 
 req_file = os.path.join(
@@ -22,12 +22,12 @@ install_reqs = parse_requirements(req_file , session=False)
 reqs = [str(ir.req) for ir in install_reqs]
 
 setup(
-    name='interleave',
+    name='threadmock',
     version='0.1',
     description=('Library for testing thread-safety in a repeatable-deterministic way.'),
     ext_modules=[patch_c_func, patch_greenlet],
     packages=[
-        'interleave',
+        'threadmock',
     ],
     package_data={},
     install_requires=reqs,

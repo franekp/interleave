@@ -2,7 +2,7 @@ import unittest
 import thread
 import threading
 
-from interleave import patch_c_func
+from threadmock import patch_c_func
 
 
 class TestPatchCFunc(unittest.TestCase):

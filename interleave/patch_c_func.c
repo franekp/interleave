@@ -82,7 +82,7 @@ static PyMethodDef methods[] = {
 PyMODINIT_FUNC initpatch_c_func(void) {
   PyObject *m;
 
-  m = Py_InitModule("interleave.patch_c_func", methods);
+  m = Py_InitModule("threadmock.patch_c_func", methods);
   if (m == NULL)
     return;
   my__error = PyErr_NewException("patch_c_func.Error", NULL, NULL);

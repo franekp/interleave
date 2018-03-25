@@ -1,10 +1,9 @@
 import unittest
 import threading
-# FIXME TODO 'threadmock' is a much better name for this project!
-from interleave import backtrack_test, whitebox_test, random_test
+from threadmock import backtrack_test, whitebox_test, random_test
 
 
-@interleave.defaults(max_depth=10, runs=1000)
+@threadmock.defaults(max_depth=10, runs=1000)
 class PlannedAPIExamples__General(unittest.TestCase):
     @random_test(runs=5000)
     def test_random(self):
@@ -78,7 +77,7 @@ class PlannedAPIExamples__General(unittest.TestCase):
         # the thread is paused anyway
         b2.release()
 
-        # s is an instance of interleave.State
+        # s is an instance of threadmock.State
         # s.switch_when(...) is equivalent to calling this method on every
         # thread (including threads that will be created in the future - this of
         # course applies only to the end of function currently decorated with
@@ -188,12 +187,12 @@ class PlannedAPIExamples__General(unittest.TestCase):
         self.assertSomething(SUT)
 
 
-@interleave.defaults(max_depth=10, runs=1000)
+@threadmock.defaults(max_depth=10, runs=1000)
 class PlannedAPIExamples__Predicates(unittest.TestCase):
     # predicates here are illustrated using Thread.run_until
     # they work the same way when used as arguments to:
     # Breakpoint.__init__, Thread.run_while, Thread.switch_when,
-    # interleave.State.switch_when, interleave.State.add_invariant
+    # threadmock.State.switch_when, threadmock.State.add_invariant
     @whitebox_test
     def test_whitebox_create(self, s):
 
@@ -201,7 +200,7 @@ class PlannedAPIExamples__Predicates(unittest.TestCase):
         t1 = threading.Thread(target=SUT.do_work)
         t2 = threading.Thread(target=SUT.do_work)
 
-        # s is an instance of interleave.State
+        # s is an instance of threadmock.State
         # add an invariant to be checked before each executed line
         # of code (implemented as a sys.settrace hack). This is most useful in
         # random_test and backtrack_test though

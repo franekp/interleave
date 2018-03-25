@@ -17,9 +17,9 @@ def run_tests():
 subprocess.check_call("python setup.py build 2>&1 > /dev/null", shell=True)
 subprocess.check_call("python setup.py install 2>&1 > /dev/null", shell=True)
 
-os.chdir('tests') # chdir to tests/ so that local version of interleave module
+os.chdir('tests') # chdir to tests/ so that local version of threadmock module
 sys.path[0] = os.path.join(sys.path[0], 'tests')
-from interleave import patch_greenlet
+from threadmock import patch_greenlet
 
 # does not hide installed one (only installed one has c extensions available)
 run_tests()

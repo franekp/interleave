@@ -5,7 +5,7 @@ import mock
 from decorator import decorator
 import greenlet
 
-from interleave.concurrency import BaseScheduler
+from threadmock.concurrency import BaseScheduler
 
 '''
 test method decorator names:

@@ -3,7 +3,7 @@ import os
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path = filter(lambda x: x not in ['', THIS_DIR], sys.path)
 
-from interleave import patch_greenlet
+from threadmock import patch_greenlet
 from sys import settrace
 
 import inspect

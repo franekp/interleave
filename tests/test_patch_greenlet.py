@@ -3,7 +3,7 @@ import sys
 import greenlet
 import inspect
 
-from interleave import patch_greenlet
+from threadmock import patch_greenlet
 
 
 class BaseTestPatchGreenlet(object):

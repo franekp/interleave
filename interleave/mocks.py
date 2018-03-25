@@ -4,7 +4,7 @@ import contextlib2
 import thread
 import time
 
-from interleave import concurrency
+from threadmock import concurrency
 import patch_c_func
 
 

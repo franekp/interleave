@@ -59,7 +59,7 @@ static PyMethodDef methods[] = {
 PyMODINIT_FUNC initpatch_greenlet(void) {
   PyObject *m;
 
-  m = Py_InitModule("interleave.patch_greenlet", methods);
+  m = Py_InitModule("threadmock.patch_greenlet", methods);
   if (m == NULL)
     return;
   my__builtinsmodule = PyEval_GetBuiltins();
